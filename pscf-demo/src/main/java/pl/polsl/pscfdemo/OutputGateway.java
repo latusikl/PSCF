@@ -15,7 +15,7 @@ public class OutputGateway implements MqttConfiguration.MyGateway {
 	private final MessageChannel messageChannelOut;
 	private final ObjectMapper objectMapper;
 
-	public OutputGateway(final @Qualifier("mqttOutboundChanel") MessageChannel messageChannelOut, final ObjectMapper objectMapper) {
+	public OutputGateway(final @Qualifier("mqttOutboundChannel") MessageChannel messageChannelOut, final ObjectMapper objectMapper) {
 		this.messageChannelOut = messageChannelOut;
 		this.objectMapper = objectMapper;
 	}

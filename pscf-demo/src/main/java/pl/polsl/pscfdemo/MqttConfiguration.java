@@ -9,9 +9,12 @@ import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
+import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
+import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
@@ -22,6 +25,7 @@ public class MqttConfiguration {
 	@Value("${output.topic}")
 	String outputTopic;
 
+	//========================================================OUTBOUND
 
 	//Client config
 	@Bean
@@ -39,7 +43,7 @@ public class MqttConfiguration {
 	@ServiceActivator(inputChannel = "mqttOutboundChannel")
 	public MessageHandler mqttOutbound() {
 		MqttPahoMessageHandler messageHandler =
-				new MqttPahoMessageHandler("Cloud Client", mqttClientFactory());
+				new MqttPahoMessageHandler("Cloud Send Client", mqttClientFactory());
 		messageHandler.setAsync(true);
 		messageHandler.setDefaultTopic(outputTopic);
 		return messageHandler;
@@ -47,7 +51,7 @@ public class MqttConfiguration {
 
 	//Outbound chanel to broker
 	@Bean
-	@Qualifier("mqttOutboundChanel")
+	@Qualifier("mqttOutboundChannel")
 	public MessageChannel mqttOutboundChannel() {
 		return new DirectChannel();
 	}
@@ -58,4 +62,33 @@ public class MqttConfiguration {
 		void sendToMqtt(String data);
 
 	}
+
+	//========================================================OUTBOUND
+	//========================================================INBOUND
+
+
+	@Bean
+	@Qualifier("mqttInputChannel")
+	public MessageChannel mqttInputChannel() {
+		return new DirectChannel();
+	}
+
+	@Bean
+	public MessageProducer inbound() {
+		MqttPahoMessageDrivenChannelAdapter adapter =
+				new MqttPahoMessageDrivenChannelAdapter("tcp://localhost:1883", "Cloud Listen Client",
+						"pscf-in");
+		adapter.setCompletionTimeout(5000);
+		adapter.setConverter(new DefaultPahoMessageConverter());
+		adapter.setQos(1);
+		adapter.setOutputChannel(mqttInputChannel());
+		return adapter;
+	}
+
+	@Bean
+	@ServiceActivator(inputChannel = "mqttInputChannel")
+	public MessageHandler handler() {
+		return new CustomMessageHandler();
+	}
+	//========================================================INBOUND
 }
