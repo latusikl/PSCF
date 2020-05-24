@@ -90,8 +90,8 @@ public class MqttConfiguration {
 
 	@Bean
 	@ServiceActivator(inputChannel = "mqttInputChannel")
-	public MessageHandler handler() {
-		return new InputMessageHandler();
+	public MessageHandler handler(final InputMessageHandler inputMessageHandler) {
+		return inputMessageHandler;
 	}
 	//========================================================INBOUND
 }

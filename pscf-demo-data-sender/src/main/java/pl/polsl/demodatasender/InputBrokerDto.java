@@ -1,4 +1,4 @@
-package pl.polsl.pscfdemo.dto;
+package pl.polsl.demodatasender;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

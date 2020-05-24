@@ -7,7 +7,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import pl.polsl.pscfdemo.dto.OutputDto;
+import pl.polsl.pscfdemo.dto.OutputBrokerDto;
 
 @Component
 public class OutputSenderImpl implements OutputSender {
@@ -27,7 +27,7 @@ public class OutputSenderImpl implements OutputSender {
 	}
 
 	@Override
-	public void sendToMqtt(final OutputDto data) {
+	public void sendToMqtt(final OutputBrokerDto data) {
 		Message<String> message = null;
 		try {
 			message = MessageBuilder.withPayload(objectMapper.writeValueAsString(data)).build();
