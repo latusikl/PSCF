@@ -3,6 +3,7 @@ package pl.polsl.demodatasender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.decimal4j.util.DoubleRounder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -14,12 +15,26 @@ import java.util.Random;
 @Slf4j
 public class DataSender{
 
+	private InputBrokerDto lastSentData;
+
 	private final MessageChannel mqttOutboundChannel;
 	private final ObjectMapper objectMapper;
 
 	public DataSender(final MessageChannel mqttOutboundChannel) {
 		this.mqttOutboundChannel = mqttOutboundChannel;
 		this.objectMapper = new ObjectMapper();
+		lastSentData = InputBrokerDto.builder()
+						.accident(false)
+						.carbonFilter(true)
+						.dose(3.0)
+						.gravelFilter(true)
+						.percentageOfChemicals(1.0)
+						.phValue(10.0)
+						.pumpOneState(true)
+						.pumpTwoState(true)
+						.reverseOsmosis(true)
+						.temperature(20.0)
+						.build();
 	}
 
 
@@ -35,12 +50,15 @@ public class DataSender{
 	
 	public static double generateRandomDoubleRange(double min, double max) {
 		Random r = new Random();
-		return min + r.nextDouble() * (max - min);
+		return DoubleRounder.round(min + r.nextDouble() * (max - min), 3);
 	}
 
-	public static boolean generateRandomBoolean() {
+	public static boolean generateChosenBooleanWithChosenPercentProbability(boolean chosenBoolean, int chosenPercent) {
 		Random r = new Random();
-		return r.nextBoolean();
+		int value = r.nextInt(100/chosenPercent);
+		if(chosenBoolean)
+			return value == 0;
+		return value != 0;
 	}
 
 	//TODO Random messages
@@ -48,18 +66,19 @@ public class DataSender{
 	@Scheduled(fixedRate = 1000)
 	public void sendData() {
 		InputBrokerDto data = InputBrokerDto.builder()
-				.accident(generateRandomBoolean())
-				.carbonFilter(generateRandomBoolean())
-				.dose(generateRandomDoubleRange(1,4))
-				.gravelFilter(generateRandomBoolean())
-				.percentageOfChemicals(generateRandomDoubleRange(0,10))
-				.phValue(generateRandomDoubleRange(7,14))
-				.pumpOneState(generateRandomBoolean())
-				.pumpTwoState(generateRandomBoolean())
-				.reverseOsmosis(generateRandomBoolean())
-				.temperature(generateRandomDoubleRange(5,40))
+				.accident(generateChosenBooleanWithChosenPercentProbability(true, 1))
+				.carbonFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
+				.dose(this.lastSentData.dose+generateRandomDoubleRange(0,0.1))
+				.gravelFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
+				.percentageOfChemicals(this.lastSentData.percentageOfChemicals+generateRandomDoubleRange(0,0.1))
+				.phValue(this.lastSentData.phValue+generateRandomDoubleRange(0, 0.1))
+				.pumpOneState(generateChosenBooleanWithChosenPercentProbability(false, 1))
+				.pumpTwoState(generateChosenBooleanWithChosenPercentProbability(false, 2))
+				.reverseOsmosis(generateChosenBooleanWithChosenPercentProbability(false, 2))
+				.temperature(this.lastSentData.temperature+generateRandomDoubleRange(0,0.1))
 				.build();
 		this.sendToMqtt(data);
+		this.lastSentData = data;
 		log.info("Sample data send!");
 	}
 
