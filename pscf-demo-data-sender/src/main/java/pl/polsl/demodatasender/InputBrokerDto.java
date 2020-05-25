@@ -12,36 +12,36 @@ import java.time.Instant;
 public class InputBrokerDto {
 
 	@JsonProperty("pH")
-	Double phValue;
+	private Double phValue;
 
 	@JsonProperty("temp")
-	Double temperature;
+	private Double temperature;
 
 	@JsonProperty("proc")
-	Double percentageOfChemicals;
+	private Double percentageOfChemicals;
 
 	@JsonProperty("dawka")
-	Double dose;
+	private Double dose;
 
 	@JsonProperty("bOdwroconaOsmoza")
-	Boolean reverseOsmosis;
+	private Boolean reverseOsmosis;
 
 	@JsonProperty("bFiltrWeglowyOk")
-	Boolean carbonFilter;
+	private Boolean carbonFilter;
 
 	@JsonProperty("bFiltrZwirowyOk")
-	Boolean gravelFilter;
+	private Boolean gravelFilter;
 
 	@JsonProperty("bPompa1")
-	Boolean pumpOneState;
+	private Boolean pumpOneState;
 
 	@JsonProperty("bPompa2")
-	Boolean pumpTwoState;
+	private Boolean pumpTwoState;
 
 	@JsonProperty("bAwaria")
-	Boolean accident;
+	private Boolean accident;
 
 	@JsonIgnore
-	Instant timestamp;
+	private Instant timestamp;
 
 }
