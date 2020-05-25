@@ -26,7 +26,7 @@ public class DataSender{
 		lastSentData = InputBrokerDto.builder()
 						.accident(false)
 						.carbonFilter(true)
-						.dose(3.0)
+						.dose(5.1)
 						.gravelFilter(true)
 						.percentageOfChemicals(1.0)
 						.phValue(10.0)
@@ -65,13 +65,16 @@ public class DataSender{
 	//One second
 	@Scheduled(fixedRate = 1000)
 	public void sendData() {
+
+		double newPhValue = this.lastSentData.phValue+(this.lastSentData.dose-5)/100 * this.lastSentData.phValue;
+
 		InputBrokerDto data = InputBrokerDto.builder()
 				.accident(generateChosenBooleanWithChosenPercentProbability(true, 1))
 				.carbonFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
 				.dose(DoubleRounder.round(this.lastSentData.dose+generateRandomDoubleRange(0,0.1), 3))
 				.gravelFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
 				.percentageOfChemicals(DoubleRounder.round(this.lastSentData.percentageOfChemicals+generateRandomDoubleRange(0,0.1), 3))
-				.phValue(DoubleRounder.round(this.lastSentData.phValue+generateRandomDoubleRange(0, 0.1), 3))
+				.phValue(DoubleRounder.round(newPhValue, 3))
 				.pumpOneState(generateChosenBooleanWithChosenPercentProbability(false, 1))
 				.pumpTwoState(generateChosenBooleanWithChosenPercentProbability(false, 2))
 				.reverseOsmosis(generateChosenBooleanWithChosenPercentProbability(false, 2))
