@@ -10,18 +10,18 @@ import lombok.Data;
 public class OutputBrokerDto {
 
 	@JsonProperty("dawka")
-	Double dose;
+	private Double dose;
 
 	@JsonProperty("bPompa1")
-	Boolean pumpOneState;
+	private Boolean pumpOneState;
 
 	@JsonProperty("bPompa2")
-	Boolean pumpTwoState;
+	private Boolean pumpTwoState;
 
 	@JsonProperty("bAwaria")
-	Boolean accident;
+	private Boolean accident;
 
 	@JsonProperty("bStop")
-	Boolean emergencyStop;
+	private Boolean emergencyStop;
 
 }
