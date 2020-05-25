@@ -24,7 +24,6 @@ public class DataMemoryService {
 	protected static LinkedList<InputBrokerDto> measurementList = new LinkedList<>();
 
 	public void addMeasurement(final InputBrokerDto newMeasurement) {
-		newMeasurement.setTimestamp(Instant.now());
 		if (MAX_LIST_SIZE > currentListSize) {
 			measurementList.add(newMeasurement);
 			currentListSize++;
@@ -32,7 +31,7 @@ public class DataMemoryService {
 		} else {
 			measurementList.removeFirst();
 			measurementList.add(newMeasurement);
-			log.info("New object added. List full removing the oldest.");
+			log.info("New object added. List is full. Removing the oldest measurement.");
 		}
 
 	}
