@@ -30,7 +30,7 @@ public class DataAnalysis {
 
         final InputBrokerDto lastSent = dataMemoryService.getAllMeasurements().getLast();
         log.info("Processing data beginning at {} and ending at {}.",
-                dataMemoryService.getAllMeasurements().getFirst(), lastSent.getTimestamp());
+                dataMemoryService.getAllMeasurements().getFirst().getTimestamp(), lastSent.getTimestamp());
         if (this.getAvgTemp() > 35.0 || this.getAvgTemp() < 10.0) {
             log.info("TEMPERATURE WARNING!  Current average temperature: {}", this.getAvgTemp());
             emergency();
@@ -55,16 +55,15 @@ public class DataAnalysis {
                 .build();
 
         if (this.getAvgPercentage() < 0.5 || this.getAvgPhValue() < 4.0) {
-            Double newDose = lastSent.getDose() + 0.5;
+            final Double newDose = lastSent.getDose() + 0.5;
             data.setDose(newDose);
             log.info("Dose is too low. Changing from {} to {}.", lastSent.getDose(), newDose);
         } else if (this.getAvgPercentage() > 10.0 || this.getAvgPhValue() > 9.0) {
             Double newDose = lastSent.getDose() - 0.5;
-            if (newDose > 0) {
-                data.setDose(newDose);
-            } else {
-                data.setDose(0.0);
+            if (newDose < 0) {
+                newDose = 0.0;
             }
+            data.setDose(newDose);
             log.info("Dose is too high. Changing from {} to {}.", lastSent.getDose(), newDose);
         }
 
