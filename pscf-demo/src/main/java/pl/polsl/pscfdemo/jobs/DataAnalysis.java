@@ -1,6 +1,5 @@
 package pl.polsl.pscfdemo.jobs;
 
-import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,9 +28,9 @@ public class DataAnalysis {
             return;
         }
 
-        final InputBrokerDto lastSent = Iterables.getLast(dataMemoryService.getAllMeasurements());
+        final InputBrokerDto lastSent = dataMemoryService.getAllMeasurements().getLast();
         log.info("Processing data beginning at {} and ending at {}.",
-                dataMemoryService.getAllMeasurements().iterator().next().getTimestamp(), lastSent.getTimestamp());
+                dataMemoryService.getAllMeasurements().getFirst(), lastSent.getTimestamp());
         if (this.getAvgTemp() > 35.0 || this.getAvgTemp() < 10.0) {
             log.info("TEMPERATURE WARNING!  Current average temperature: {}", this.getAvgTemp());
             emergency();
