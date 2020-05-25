@@ -12,7 +12,7 @@ import java.time.Instant;
 public class InputBrokerDto {
 
 	@JsonProperty("pH")
-	Integer phValue;
+	Double phValue;
 
 	@JsonProperty("temp")
 	Double temperature;
