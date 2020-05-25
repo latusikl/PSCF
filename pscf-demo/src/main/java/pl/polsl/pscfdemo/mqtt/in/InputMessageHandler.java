@@ -39,7 +39,7 @@ public class InputMessageHandler implements MessageHandler {
         log.info("New message received!");
         final String messageBody = (String) message.getPayload();
         try {
-            InputBrokerDto data = objectMapper.readValue(messageBody, InputBrokerDto.class);
+            final InputBrokerDto data = objectMapper.readValue(messageBody, InputBrokerDto.class);
             data.setTimestamp(Instant.now());
             dataAnalysis.checkForAccident(data);
             dataMemoryService.addMeasurement(data);
