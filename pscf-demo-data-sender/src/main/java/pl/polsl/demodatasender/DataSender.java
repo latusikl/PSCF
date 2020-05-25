@@ -71,7 +71,7 @@ public class DataSender{
 		InputBrokerDto data = InputBrokerDto.builder()
 				.accident(generateChosenBooleanWithChosenPercentProbability(true, 1))
 				.carbonFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
-				.dose(DoubleRounder.round(this.lastSentData.dose+generateRandomDoubleRange(0,0.1), 3))
+				.dose(DoubleRounder.round(this.lastSentData.dose, 3))
 				.gravelFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
 				.percentageOfChemicals(DoubleRounder.round(this.lastSentData.percentageOfChemicals+generateRandomDoubleRange(0,0.1), 3))
 				.phValue(DoubleRounder.round(newPhValue, 3))
