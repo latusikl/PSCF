@@ -19,9 +19,9 @@ public class OutputBrokerDto {
 	Boolean pumpTwoState;
 
 	@JsonProperty("bAwaria")
-	Boolean accident = false;
+	Boolean accident;
 
 	@JsonProperty("bStop")
-	Boolean emergencyStop = false;
+	Boolean emergencyStop;
 
 }
