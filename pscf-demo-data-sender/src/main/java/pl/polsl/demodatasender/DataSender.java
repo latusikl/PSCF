@@ -50,7 +50,7 @@ public class DataSender{
 	
 	public static double generateRandomDoubleRange(double min, double max) {
 		Random r = new Random();
-		return DoubleRounder.round(min + r.nextDouble() * (max - min), 3);
+		return min + r.nextDouble() * (max - min);
 	}
 
 	public static boolean generateChosenBooleanWithChosenPercentProbability(boolean chosenBoolean, int chosenPercent) {
@@ -68,14 +68,14 @@ public class DataSender{
 		InputBrokerDto data = InputBrokerDto.builder()
 				.accident(generateChosenBooleanWithChosenPercentProbability(true, 1))
 				.carbonFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
-				.dose(this.lastSentData.dose+generateRandomDoubleRange(0,0.1))
+				.dose(DoubleRounder.round(this.lastSentData.dose+generateRandomDoubleRange(0,0.1), 3))
 				.gravelFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
-				.percentageOfChemicals(this.lastSentData.percentageOfChemicals+generateRandomDoubleRange(0,0.1))
-				.phValue(this.lastSentData.phValue+generateRandomDoubleRange(0, 0.1))
+				.percentageOfChemicals(DoubleRounder.round(this.lastSentData.percentageOfChemicals+generateRandomDoubleRange(0,0.1), 3))
+				.phValue(DoubleRounder.round(this.lastSentData.phValue+generateRandomDoubleRange(0, 0.1), 3))
 				.pumpOneState(generateChosenBooleanWithChosenPercentProbability(false, 1))
 				.pumpTwoState(generateChosenBooleanWithChosenPercentProbability(false, 2))
 				.reverseOsmosis(generateChosenBooleanWithChosenPercentProbability(false, 2))
-				.temperature(this.lastSentData.temperature+generateRandomDoubleRange(0,0.1))
+				.temperature(DoubleRounder.round(this.lastSentData.temperature+generateRandomDoubleRange(0,0.1), 3))
 				.build();
 		this.sendToMqtt(data);
 		this.lastSentData = data;
