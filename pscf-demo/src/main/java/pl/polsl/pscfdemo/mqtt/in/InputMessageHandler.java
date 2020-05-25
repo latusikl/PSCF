@@ -11,6 +11,8 @@ import pl.polsl.pscfdemo.dto.InputBrokerDto;
 import pl.polsl.pscfdemo.jobs.DataAnalysis;
 import pl.polsl.pscfdemo.services.DataMemoryService;
 
+import java.time.Instant;
+
 /**
  * Handles input message from mqtt broker.
  * Subscribed topic is called pscf-in
@@ -38,6 +40,7 @@ public class InputMessageHandler implements MessageHandler {
         final String messageBody = (String) message.getPayload();
         try {
             InputBrokerDto data = objectMapper.readValue(messageBody, InputBrokerDto.class);
+            data.setTimestamp(Instant.now());
             dataAnalysis.checkForAccident(data);
             dataMemoryService.addMeasurement(data);
             log.info("Object JSON mapped to Input DTO.");
