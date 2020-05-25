@@ -1,5 +1,6 @@
 package pl.polsl.pscfdemo.jobs;
 
+import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,31 +23,36 @@ public class DataAnalysis {
 
     @Scheduled(fixedRate = 60000)
     public void processData() {
-        if (dataMemoryService.getAllMeasurements().size() > 0) {
-            log.info(dataMemoryService.getAllMeasurements().get(0).getTimestamp().toString());
-
-            OutputBrokerDto data = OutputBrokerDto.builder()
-                    .accident(false)
-                    .dose(10.0).emergencyStop(false)
-                    .pumpOneState(true)
-                    .pumpTwoState(false)
-                    .build();
-            outputSender.sendToMqtt(data);
+        if (dataMemoryService.getAllMeasurements().isEmpty()) {
+            return;
         }
+
+        log.info("Processing data beginning at {} and ending at {}.",
+                dataMemoryService.getAllMeasurements().iterator().next().getTimestamp(),
+                Iterables.getLast(dataMemoryService.getAllMeasurements()).getTimestamp());
+
+        OutputBrokerDto data = OutputBrokerDto.builder()
+                .accident(false)
+                .dose(10.0)
+                .emergencyStop(false)
+                .pumpOneState(true)
+                .pumpTwoState(false)
+                .build();
+        outputSender.sendToMqtt(data);
     }
 
     public void checkForAccident(final InputBrokerDto data) {
         if (data.getAccident() || !data.getCarbonFilter() || !data.getGravelFilter()) {
             OutputBrokerDto emergencyData = OutputBrokerDto.builder().accident(true).emergencyStop(true).build();
             outputSender.sendToMqtt(emergencyData);
-            if (!data.getAccident()) {
-                log.info("WARNING!!! ACCIDENT! Date: " + data.getTimestamp());
+            if (data.getAccident()) {
+                log.info("WARNING!!! ACCIDENT! Date: {}", data.getTimestamp());
             }
             if (!data.getCarbonFilter()) {
-                log.info("WARNING!!! Carbon filter needs to be replaced! Date: " + data.getTimestamp());
+                log.info("WARNING!!! Carbon filter needs to be replaced! Date: {}", data.getTimestamp());
             }
             if (!data.getGravelFilter()) {
-                log.info("WARNING!!! Gravel filter needs to be replaced! Date: " + data.getTimestamp());
+                log.info("WARNING!!! Gravel filter needs to be replaced! Date: {}", data.getTimestamp());
             }
         }
     }
