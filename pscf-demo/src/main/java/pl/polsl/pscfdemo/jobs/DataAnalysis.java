@@ -33,12 +33,28 @@ public class DataAnalysis {
         log.info("Processing data beginning at {} and ending at {}.",
                 dataMemoryService.getAllMeasurements().iterator().next().getTimestamp(), lastSent.getTimestamp());
         if (this.getAvgTemp() > 35.0 || this.getAvgTemp() < 10.0) {
-            log.info("TEMPERATURE WARNING!!!  Current average temperature: {}", this.getAvgTemp());
-            stopPumps();
+            log.info("TEMPERATURE WARNING!  Current average temperature: {}", this.getAvgTemp());
+            emergency();
             return;
         }
 
-        final OutputBrokerDto data = new OutputBrokerDto();
+        if (!lastSent.getPumpOneState() && !lastSent.getPumpTwoState()) {
+            log.info("WARNING! Both pumps are turned off.");
+            emergency();
+            return;
+        }
+
+        if (!lastSent.getPumpOneState() && lastSent.getPumpTwoState() || lastSent.getPumpOneState() && !lastSent.getPumpTwoState()) {
+            log.info("WARNING! One pump is turned off.");
+        }
+
+        final OutputBrokerDto data = OutputBrokerDto.builder()
+                .accident(false)
+                .emergencyStop(false)
+                .pumpOneState(lastSent.getPumpOneState())
+                .pumpTwoState(lastSent.getPumpTwoState())
+                .build();
+
         if (this.getAvgPercentage() < 0.5 || this.getAvgPhValue() < 4.0) {
             Double newDose = lastSent.getDose() + 0.5;
             data.setDose(newDose);
@@ -70,13 +86,19 @@ public class DataAnalysis {
             if (!data.getReverseOsmosis()) {
                 log.info("WARNING! Reverse osmosis is turned off! Date: {}", data.getTimestamp());
             }
-            this.stopPumps();
+            this.emergency();
         }
     }
 
-    private void stopPumps() {
-        log.info("Stopping pumps.");
-        OutputBrokerDto emergencyData = OutputBrokerDto.builder().accident(true).emergencyStop(true).build();
+    private void emergency() {
+        log.info("Emergency signal. Turning system off.");
+        OutputBrokerDto emergencyData = OutputBrokerDto.builder()
+                .accident(true)
+                .emergencyStop(true)
+                .pumpTwoState(false)
+                .pumpOneState(false)
+                .dose(0.0)
+                .build();
         outputSender.sendToMqtt(emergencyData);
     }
 
