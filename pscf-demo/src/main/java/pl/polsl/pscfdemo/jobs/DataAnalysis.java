@@ -40,39 +40,42 @@ public class DataAnalysis {
 
         final OutputBrokerDto data = new OutputBrokerDto();
         if (this.getAvgPercentage() < 0.5 || this.getAvgPhValue() < 4.0) {
-            data.setDose(lastSent.getDose() + 0.5);
+            Double newDose = lastSent.getDose() + 0.5;
+            data.setDose(newDose);
+            log.info("Dose is too low. Changing from {} to {}.", lastSent.getDose(), newDose);
         } else if (this.getAvgPercentage() > 10.0 || this.getAvgPhValue() > 9.0) {
-            double newDose = lastSent.getDose() - 0.5;
+            Double newDose = lastSent.getDose() - 0.5;
             if (newDose > 0) {
                 data.setDose(newDose);
             } else {
                 data.setDose(0.0);
             }
+            log.info("Dose is too high. Changing from {} to {}.", lastSent.getDose(), newDose);
         }
-        
+
         outputSender.sendToMqtt(data);
     }
 
     public void checkForAccident(final InputBrokerDto data) {
         if (data.getAccident() || !data.getCarbonFilter() || !data.getGravelFilter() || !data.getReverseOsmosis()) {
-            this.stopPumps();
             if (data.getAccident()) {
-                log.info("WARNING!!! ACCIDENT! Date: {}", data.getTimestamp());
+                log.info("WARNING! ACCIDENT! Date: {}", data.getTimestamp());
             }
             if (!data.getCarbonFilter()) {
-                log.info("WARNING!!! Carbon filter needs to be replaced! Date: {}", data.getTimestamp());
+                log.info("WARNING! Carbon filter needs to be replaced! Date: {}", data.getTimestamp());
             }
             if (!data.getGravelFilter()) {
-                log.info("WARNING!!! Gravel filter needs to be replaced! Date: {}", data.getTimestamp());
+                log.info("WARNING! Gravel filter needs to be replaced! Date: {}", data.getTimestamp());
             }
-            if (!data.getGravelFilter()) {
-                log.info("WARNING!!! Reverse osmosis is turned off! Date: {}", data.getTimestamp());
+            if (!data.getReverseOsmosis()) {
+                log.info("WARNING! Reverse osmosis is turned off! Date: {}", data.getTimestamp());
             }
+            this.stopPumps();
         }
     }
 
     private void stopPumps() {
-        log.info("Stopping pumps");
+        log.info("Stopping pumps.");
         OutputBrokerDto emergencyData = OutputBrokerDto.builder().accident(true).emergencyStop(true).build();
         outputSender.sendToMqtt(emergencyData);
     }
@@ -82,7 +85,7 @@ public class DataAnalysis {
         if (dataList.isEmpty()) {
             return 0.0;
         }
-        return dataList.stream().mapToDouble(data -> data.getPhValue()).sum();
+        return dataList.stream().mapToDouble(data -> data.getPhValue()).sum() / dataList.size();
     }
 
     private Double getAvgPercentage() {
@@ -90,7 +93,7 @@ public class DataAnalysis {
         if (dataList.isEmpty()) {
             return 0.0;
         }
-        return dataList.stream().mapToDouble(data -> data.getPercentageOfChemicals()).sum();
+        return dataList.stream().mapToDouble(data -> data.getPercentageOfChemicals()).sum() / dataList.size();
     }
 
     private Double getAvgTemp() {
@@ -98,7 +101,7 @@ public class DataAnalysis {
         if (dataList.isEmpty()) {
             return 0.0;
         }
-        return dataList.stream().mapToDouble(data -> data.getTemperature()).sum();
+        return dataList.stream().mapToDouble(data -> data.getTemperature()).sum() / dataList.size();
     }
 
 }
