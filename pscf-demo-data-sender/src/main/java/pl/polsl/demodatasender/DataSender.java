@@ -66,20 +66,25 @@ public class DataSender{
 	@Scheduled(fixedRate = 1000)
 	public void sendData() {
 
-		double newPhValue = this.lastSentData.phValue+(this.lastSentData.dose-5)/100 * this.lastSentData.phValue;
+		double calculatePh = this.lastSentData.phValue + (this.lastSentData.dose-5) / 100;
+		double newPhValue = calculatePh < 0 ? 0 : calculatePh;
+
+		double calculatePercentageOfChemicalsValue = this.lastSentData.percentageOfChemicals + (this.lastSentData.dose-5) / 100;
+		double newPercentageOfChemicalsValue = calculatePercentageOfChemicalsValue < 0 ? 0 : calculatePercentageOfChemicalsValue;
 
 		InputBrokerDto data = InputBrokerDto.builder()
 				.accident(generateChosenBooleanWithChosenPercentProbability(true, 1))
 				.carbonFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
 				.dose(DoubleRounder.round(this.lastSentData.dose, 3))
 				.gravelFilter(generateChosenBooleanWithChosenPercentProbability(false, 2))
-				.percentageOfChemicals(DoubleRounder.round(this.lastSentData.percentageOfChemicals+generateRandomDoubleRange(0,0.1), 3))
+				.percentageOfChemicals(DoubleRounder.round(newPercentageOfChemicalsValue, 3))
 				.phValue(DoubleRounder.round(newPhValue, 3))
 				.pumpOneState(generateChosenBooleanWithChosenPercentProbability(false, 1))
 				.pumpTwoState(generateChosenBooleanWithChosenPercentProbability(false, 2))
 				.reverseOsmosis(generateChosenBooleanWithChosenPercentProbability(false, 2))
-				.temperature(DoubleRounder.round(this.lastSentData.temperature+generateRandomDoubleRange(0,0.1), 3))
+				.temperature(DoubleRounder.round(this.lastSentData.temperature+generateRandomDoubleRange(-0.1,0.1), 3))
 				.build();
+		
 		this.sendToMqtt(data);
 		this.lastSentData = data;
 		log.info("Sample data send!");
